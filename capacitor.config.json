@@ -1,0 +1,13 @@
+{
+  "appId": "com.chaojia.app",
+  "appName": "全民嘲家",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "preferredContentMode": "mobile",
+    "scheme": "ChaojiaApp"
+  }
+}

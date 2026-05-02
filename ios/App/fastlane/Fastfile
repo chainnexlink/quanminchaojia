@@ -1,0 +1,158 @@
+default_platform(:ios)
+
+platform :ios do
+  # Revoke orphaned distribution certificates whose private keys were lost in previous CI runs
+  private_lane :revoke_orphaned_certs do |options|
+    require 'spaceship'
+
+    api_key = options[:api_key]
+
+    token = Spaceship::ConnectAPI::Token.create(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+      filepath: ENV["API_KEY_PATH"]
+    )
+    Spaceship::ConnectAPI.token = token
+
+    all_certs = []
+    ["DISTRIBUTION", "IOS_DISTRIBUTION"].each do |cert_type|
+      found = Spaceship::ConnectAPI::Certificate.all(
+        filter: { certificateType: cert_type }
+      )
+      UI.message("Found #{found.count} certificate(s) of type #{cert_type}")
+      all_certs.concat(found)
+    end
+
+    UI.message("Total distribution certificates: #{all_certs.count}")
+
+    if all_certs.count >= 2
+      UI.important("Maximum certificates reached, revoking all orphaned certificates...")
+      all_certs.each do |cert|
+        UI.message("Revoking certificate: #{cert.id} (#{cert.display_name})")
+        cert.delete!
+      end
+      UI.success("Revoked #{all_certs.count} orphaned certificate(s)")
+    end
+  end
+
+  desc "Build and upload to App Store Connect"
+  lane :release do
+    keychain_path = ENV["KEYCHAIN_PATH"]
+    keychain_password = ENV["KEYCHAIN_PASSWORD"]
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+      key_filepath: ENV["API_KEY_PATH"],
+      in_house: false
+    )
+
+    revoke_orphaned_certs(api_key: api_key)
+
+    get_certificates(
+      api_key: api_key,
+      platform: "ios",
+      keychain_path: keychain_path,
+      keychain_password: keychain_password
+    )
+
+    sh("security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '#{keychain_password}' '#{keychain_path}'")
+    sh("security find-identity -v -p codesigning '#{keychain_path}'")
+
+    get_provisioning_profile(
+      api_key: api_key,
+      app_identifier: "com.chaojia.app",
+      platform: "ios",
+      force: true
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      team_id: ENV["APPLE_TEAM_ID"],
+      path: "App.xcodeproj",
+      code_sign_identity: "Apple Distribution",
+      profile_name: lane_context[SharedValues::SIGH_NAME],
+      bundle_identifier: "com.chaojia.app",
+      targets: ["App"]
+    )
+
+    build_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      configuration: "Release",
+      export_method: "app-store",
+      clean: true,
+      export_options: {
+        signingStyle: "manual",
+        teamID: ENV["APPLE_TEAM_ID"],
+        provisioningProfiles: {
+          "com.chaojia.app" => lane_context[SharedValues::SIGH_NAME]
+        }
+      }
+    )
+
+    upload_to_app_store(
+      api_key: api_key,
+      skip_metadata: true,
+      skip_screenshots: true,
+      force: true,
+      precheck_include_in_app_purchases: false
+    )
+  end
+
+  desc "Build only (no upload)"
+  lane :build_only do
+    keychain_path = ENV["KEYCHAIN_PATH"]
+    keychain_password = ENV["KEYCHAIN_PASSWORD"]
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+      key_filepath: ENV["API_KEY_PATH"],
+      in_house: false
+    )
+
+    revoke_orphaned_certs(api_key: api_key)
+
+    get_certificates(
+      api_key: api_key,
+      platform: "ios",
+      keychain_path: keychain_path,
+      keychain_password: keychain_password
+    )
+
+    sh("security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '#{keychain_password}' '#{keychain_path}'")
+
+    get_provisioning_profile(
+      api_key: api_key,
+      app_identifier: "com.chaojia.app",
+      platform: "ios",
+      force: true
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      team_id: ENV["APPLE_TEAM_ID"],
+      path: "App.xcodeproj",
+      code_sign_identity: "Apple Distribution",
+      profile_name: lane_context[SharedValues::SIGH_NAME],
+      bundle_identifier: "com.chaojia.app",
+      targets: ["App"]
+    )
+
+    build_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      configuration: "Release",
+      export_method: "app-store",
+      clean: true,
+      export_options: {
+        signingStyle: "manual",
+        teamID: ENV["APPLE_TEAM_ID"],
+        provisioningProfiles: {
+          "com.chaojia.app" => lane_context[SharedValues::SIGH_NAME]
+        }
+      }
+    )
+  end
+end
