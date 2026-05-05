@@ -273,7 +273,6 @@ export function RechargePage() {
                   {inIOSApp ? (
                     /* iOS 环境 - Apple 内购 */
                     <button
-                      onClick={() => setPayMethod('wechat')}
                       className="w-full flex items-center gap-3 p-4 rounded-xl bg-slate-800/80 border-2 border-slate-400/50"
                     >
                       <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
