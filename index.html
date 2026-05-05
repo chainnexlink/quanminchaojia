@@ -8,7 +8,6 @@
   <meta name="apple-mobile-web-app-title" content="全民嘲家">
   <meta name="format-detection" content="telephone=no">
   <title>全民嘲家 - AI裁判辩论平台</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* 内联样式确保主题色立即生效，避免闪烁 */
     html, body {
@@ -39,27 +38,25 @@
   <script>
     // 在 React 加载前立即设置主题，避免闪烁
     (function() {
-      const isInIframe = window.self !== window.top;
-
       function applyThemeToDOM(theme) {
         document.documentElement.classList.remove('light', 'dark');
         document.documentElement.classList.add(theme);
         document.documentElement.setAttribute('data-theme', theme);
       }
 
-      if (isInIframe) {
-        // 监听父窗口主动推送的主题消息
+      // 默认使用 dark 主题
+      applyThemeToDOM('dark');
+
+      // iframe 环境下监听父窗口主题消息
+      if (window.self !== window.top) {
         window.addEventListener('message', function(event) {
           if (event.data && typeof event.data.theme === 'string') {
-            const theme = event.data.theme;
+            var theme = event.data.theme;
             if (theme === 'light' || theme === 'dark') {
               applyThemeToDOM(theme);
             }
           }
         });
-      } else {
-        // 非 iframe 环境，使用默认 light 主题
-        applyThemeToDOM('light');
       }
     })();
   </script>
