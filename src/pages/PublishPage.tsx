@@ -4,6 +4,7 @@ import { ArrowLeft, Camera, Video, AlertCircle, CheckCircle, Clock, MapPin, X } 
 import { useStore } from '../store';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/Toast';
+import { checkContent } from '../services/contentModeration';
 
 export function PublishPage() {
   const navigate = useNavigate();
@@ -54,6 +55,14 @@ export function PublishPage() {
   const handleSubmit = async () => {
     if (title.length < 10 || camps.some(c => c.length < 2)) return;
     if (mode === 'local' && !expireAt) return;
+
+    // 内容审核 - 敏感词检测
+    const titleCheck = checkContent(title);
+    const campsCheck = checkContent(camps.join(' '));
+    if (!titleCheck.passed || !campsCheck.passed) {
+      showToast('内容包含违规词汇，请修改后重试', 'error');
+      return;
+    }
 
     if (mode === 'local') {
       const userPoints = user?.points ?? 0;

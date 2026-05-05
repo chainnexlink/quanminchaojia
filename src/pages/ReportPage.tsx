@@ -1,7 +1,10 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle, Flag } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Flag, UserX } from 'lucide-react';
 import { useState } from 'react';
+import { useStore } from '../store';
+import { blockUser } from '../services/blockService';
+import { useToast } from '../components/Toast';
 
 const reportReasons = [
   { id: 'spam', label: '垃圾广告' },
@@ -15,12 +18,23 @@ const reportReasons = [
 export function ReportPage() {
   const navigate = useNavigate();
   const { type, id } = useParams();
+  const [searchParams] = useSearchParams();
+  const targetUserId = searchParams.get('uid') || '';
+  const { user } = useStore();
+  const { showToast } = useToast();
   const [selectedReason, setSelectedReason] = useState('');
   const [detail, setDetail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [blockChecked, setBlockChecked] = useState(true);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedReason) return;
+
+    // 同时屏蔽该用户
+    if (blockChecked && targetUserId && user) {
+      await blockUser(user.id, targetUserId);
+    }
+
     setSubmitted(true);
     setTimeout(() => navigate(-1), 1500);
   };
@@ -88,6 +102,20 @@ export function ReportPage() {
         >
           提交举报
         </motion.button>
+
+        {/* 屏蔽用户选项 */}
+        {targetUserId && (
+          <label className="flex items-center gap-3 mt-4 p-3 bg-slate-800/60 rounded-xl cursor-pointer">
+            <input
+              type="checkbox"
+              checked={blockChecked}
+              onChange={e => setBlockChecked(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-500 text-red-500 focus:ring-red-500 bg-slate-700"
+            />
+            <UserX className="w-4 h-4 text-slate-400" />
+            <span className="text-sm text-slate-300">同时屏蔽该用户（不再看到其内容）</span>
+          </label>
+        )}
       </div>
     </div>
   );

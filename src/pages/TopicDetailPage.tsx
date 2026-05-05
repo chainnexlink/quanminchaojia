@@ -9,6 +9,7 @@ import { callAIJudge as callAIJudgeAPI, type AIJudgeRequest } from '../services/
 import { checkDailyCallLimit, applyAIBoost, calculateDisplayVotes } from '../services/aiBoostService';
 import { useStore } from '../store';
 import { useToast } from '../components/Toast';
+import { checkContent } from '../services/contentModeration';
 
 const campColors = [
   { bg: 'from-cyan-500 to-blue-500', text: 'text-cyan-400', bar: 'bg-cyan-400', light: 'bg-cyan-400/15 text-cyan-400', border: 'border-cyan-500/30' },
@@ -427,6 +428,12 @@ export function TopicDetailPage() {
   const handleComment = async () => {
     if (!topic || !newComment.trim() || !user) {
       if (!user) showToast('请先登录', 'error');
+      return;
+    }
+    // 内容审核 - 敏感词检测
+    const contentCheck = checkContent(newComment);
+    if (!contentCheck.passed) {
+      showToast('评论包含违规内容，请修改后重试', 'error');
       return;
     }
     if (isMockTopic(topic.id)) {

@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Coins, CheckCircle, Smartphone, Shield, Zap, Crown, Apple } from 'lucide-react';
+import { ArrowLeft, Coins, CheckCircle, Smartphone, Shield, Zap, Crown, Apple, Loader2 } from 'lucide-react';
 import { useStore } from '../store';
 import { useToast } from '../components/Toast';
-import { rechargePackages, type RechargePackage, type PaymentMethod } from '../services/paymentService';
+import { rechargePackages, type RechargePackage, type PaymentMethod, confirmPaymentSuccess } from '../services/paymentService';
 import { isMiniProgram, openInApp, isIOSApp, isIOS } from '../services/platformService';
+import { isNativeIOS, initIAP, purchaseIAP } from '../services/iapService';
 
 // 套餐图标映射
 const packageIcons: Record<string, typeof Coins> = {
@@ -50,13 +51,40 @@ export function RechargePage() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderId, setOrderId] = useState('');
   const inMiniProgram = isMiniProgram();
-  const inIOSApp = isIOSApp() || isIOS();
+  const useAppleIAP = isNativeIOS();
+  const inIOSApp = useAppleIAP || isIOSApp() || isIOS();
+  const [iapReady, setIapReady] = useState(false);
+
+  // iOS 环境初始化 IAP
+  useEffect(() => {
+    if (useAppleIAP) {
+      initIAP().then(ok => setIapReady(ok));
+    }
+  }, [useAppleIAP]);
 
   const handleRecharge = async () => {
     if (!selectedPkg || !user) return;
 
     setSubmitting(true);
     try {
+      // iOS 原生环境使用 Apple IAP
+      if (useAppleIAP) {
+        const result = await purchaseIAP(selectedPkg.id);
+        if (result.success) {
+          const totalPoints = selectedPkg.points + selectedPkg.bonus;
+          await confirmPaymentSuccess(result.transactionId || '', user.id, totalPoints);
+          setOrderId(result.transactionId || '');
+          setOrderSuccess(true);
+          showToast('充值成功！积分已到账', 'success');
+        } else {
+          if (result.error !== '已取消购买') {
+            showToast(result.error || '购买失败', 'error');
+          }
+        }
+        return;
+      }
+
+      // 非 iOS 环境使用第三方支付
       const response = await fetch(`${API_BASE}/payment/create`, {
         method: 'POST',
         headers: {
@@ -95,13 +123,15 @@ export function RechargePage() {
           <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-10 h-10 text-green-400" />
           </div>
-          <h2 className="text-xl font-bold text-slate-100">订单已创建</h2>
+          <h2 className="text-xl font-bold text-slate-100">
+            {useAppleIAP ? '充值成功' : '订单已创建'}
+          </h2>
           <p className="text-slate-400 mt-2">
             {selectedPkg?.name} - {selectedPkg && selectedPkg.points + selectedPkg.bonus} 积分
           </p>
-          <p className="text-xs text-slate-500 mt-1">订单号：{orderId}</p>
+          {orderId && <p className="text-xs text-slate-500 mt-1">交易号：{orderId}</p>}
           <p className="text-sm text-amber-400 mt-4">
-            支付确认后积分将自动到账
+            {useAppleIAP ? '积分已到账，感谢您的支持！' : '支付确认后积分将自动到账'}
           </p>
           <div className="flex gap-3 mt-6">
             <button
@@ -338,10 +368,19 @@ export function RechargePage() {
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   onClick={handleRecharge}
-                  disabled={submitting}
+                  disabled={submitting || (useAppleIAP && !iapReady)}
                   className="w-full py-4 bg-gradient-to-r from-violet-500 to-purple-500 text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                 >
-                  {submitting ? '处理中...' : `确认支付 ¥${selectedPkg.price}`}
+                  {submitting ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      处理中...
+                    </span>
+                  ) : useAppleIAP ? (
+                    `购买 ¥${selectedPkg.price}`
+                  ) : (
+                    `确认支付 ¥${selectedPkg.price}`
+                  )}
                 </motion.button>
               </motion.div>
             )}

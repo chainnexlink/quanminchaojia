@@ -49,5 +49,11 @@
 	<string>AppIcon</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>需要访问您的相机来拍摄图片或视频作为辩论证据</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>需要访问您的相册来上传图片或视频作为辩论证据</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>需要保存分享图片到您的相册</string>
 </dict>
 </plist>

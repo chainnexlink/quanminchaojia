@@ -13,6 +13,7 @@
     "@capacitor/cli": "^7.6.2",
     "@capacitor/core": "^8.3.1",
     "@capacitor/ios": "^8.3.1",
+    "@capgo/native-purchases": "^8.3.6",
     "@emotion/is-prop-valid": "^1.4.0",
     "@supabase/supabase-js": "^2.98.0",
     "cors": "^2.8.6",
