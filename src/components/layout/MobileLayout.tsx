@@ -8,8 +8,8 @@ interface MobileLayoutProps {
 
 export function MobileLayout({ children }: MobileLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-md mx-auto min-h-screen bg-white shadow-2xl relative">
+    <div className="min-h-screen bg-slate-900">
+      <div className="w-full min-h-screen bg-slate-900 relative">
         <motion.main
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -16,7 +16,7 @@ export function BottomNav() {
   const currentPath = location.pathname + location.search;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-slate-900/95 backdrop-blur-md border-t border-slate-700/50 px-2 pb-[env(safe-area-inset-bottom)] z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-700/50 px-2 pb-[env(safe-area-inset-bottom)] z-50">
       <div className="flex items-center justify-around pt-2 pb-2">
         {navItems.map((item) => {
           const isActive = currentPath === item.path || (item.path !== '/home' && currentPath.startsWith(item.path));
