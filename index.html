@@ -2,14 +2,13 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=390, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="全民嘲家">
   <meta name="format-detection" content="telephone=no">
   <title>全民嘲家 - AI裁判辩论平台</title>
   <style>
-    /* 内联样式确保主题色立即生效，避免闪烁 */
     html, body {
       margin: 0;
       padding: 0;
@@ -19,7 +18,6 @@
       -webkit-text-size-adjust: 100%;
       -webkit-overflow-scrolling: touch;
     }
-    /* iOS 安全区域适配 */
     body {
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
@@ -36,18 +34,13 @@
     }
   </style>
   <script>
-    // 在 React 加载前立即设置主题，避免闪烁
     (function() {
       function applyThemeToDOM(theme) {
         document.documentElement.classList.remove('light', 'dark');
         document.documentElement.classList.add(theme);
         document.documentElement.setAttribute('data-theme', theme);
       }
-
-      // 默认使用 dark 主题
       applyThemeToDOM('dark');
-
-      // iframe 环境下监听父窗口主题消息
       if (window.self !== window.top) {
         window.addEventListener('message', function(event) {
           if (event.data && typeof event.data.theme === 'string') {
@@ -69,13 +62,21 @@
     </div>
   </noscript>
   <script>
-    // 超时检测：如果 10 秒后 React 仍未渲染，显示重试提示
+    window.__appErrors = [];
+    window.onerror = function(msg, url, line, col, error) {
+      window.__appErrors.push({msg: msg, url: url, line: line, col: col, error: error ? error.message : ''});
+      var root = document.getElementById('root');
+      if (root && root.children.length === 0) {
+        root.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#fff;font-size:14px;text-align:center;padding:20px;gap:12px;"><p style="font-size:16px;">应用启动失败</p><p style="color:#94a3b8;word-break:break-all;">' + msg + '</p><button onclick="location.reload()" style="padding:12px 24px;background:#7c3aed;color:#fff;border:none;border-radius:12px;font-size:14px;cursor:pointer;">点击重试</button></div>';
+      }
+    };
     window.__appLoadTimer = setTimeout(function() {
       var root = document.getElementById('root');
       if (root && root.children.length === 0) {
-        root.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#fff;font-size:16px;text-align:center;padding:20px;gap:16px;"><p>加载中，请稍候...</p><button onclick="location.reload()" style="padding:12px 24px;background:#7c3aed;color:#fff;border:none;border-radius:12px;font-size:14px;cursor:pointer;">点击重试</button></div>';
+        var errMsg = window.__appErrors.length > 0 ? window.__appErrors[0].msg : '脚本加载超时';
+        root.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#fff;font-size:14px;text-align:center;padding:20px;gap:12px;"><p style="font-size:16px;">加载中...</p><p style="color:#94a3b8;word-break:break-all;">' + errMsg + '</p><button onclick="location.reload()" style="padding:12px 24px;background:#7c3aed;color:#fff;border:none;border-radius:12px;font-size:14px;cursor:pointer;">点击重试</button></div>';
       }
-    }, 10000);
+    }, 15000);
   </script>
 </body>
 </html>
