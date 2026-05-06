@@ -98,6 +98,7 @@ import { NewOfficialSitePage } from './pages/NewOfficialSitePage';
 import { OfficialSitePage } from './pages/OfficialSitePage';
 import { LocalPage } from './pages/LocalPage';
 import { ToastProvider } from './components/Toast';
+import { Capacitor } from '@capacitor/core';
 
 function AppRoutes() {
   const location = useLocation();
@@ -106,6 +107,10 @@ function AppRoutes() {
   const isAuthPage = ['/register', '/login', '/onboarding'].includes(location.pathname);
 
   if (isOfficial) {
+    // 在 Capacitor 原生环境下，跳过官网页面直接进入 app 首页
+    if (Capacitor.isNativePlatform()) {
+      return <Navigate to="/home" replace />;
+    }
     const hostname = window.location.hostname;
     const isYicai = hostname === 'yicaijingpin.com' || hostname === 'www.yicaijingpin.com';
     return (

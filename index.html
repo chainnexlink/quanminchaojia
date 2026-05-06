@@ -63,5 +63,19 @@
 </head>
 <body>
   <div id="root"></div>
+  <noscript>
+    <div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#fff;font-size:18px;text-align:center;padding:20px;">
+      请启用 JavaScript 以使用全民嘲家
+    </div>
+  </noscript>
+  <script>
+    // 超时检测：如果 10 秒后 React 仍未渲染，显示重试提示
+    window.__appLoadTimer = setTimeout(function() {
+      var root = document.getElementById('root');
+      if (root && root.children.length === 0) {
+        root.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#fff;font-size:16px;text-align:center;padding:20px;gap:16px;"><p>加载中，请稍候...</p><button onclick="location.reload()" style="padding:12px 24px;background:#7c3aed;color:#fff;border:none;border-radius:12px;font-size:14px;cursor:pointer;">点击重试</button></div>';
+      }
+    }, 10000);
+  </script>
 </body>
 </html>
