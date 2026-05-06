@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=390, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="全民嘲家">
@@ -46,15 +46,6 @@
 
       // 默认使用 dark 主题
       applyThemeToDOM('dark');
-
-      // iPad 等比例适配：强制使用 iPhone 的 viewport 宽度，浏览器自动放大填满屏幕
-      var isIPad = navigator.userAgent.match(/iPad/) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (isIPad) {
-        var meta = document.querySelector('meta[name="viewport"]');
-        if (meta) {
-          meta.setAttribute('content', 'width=390, viewport-fit=cover');
-        }
-      }
 
       // iframe 环境下监听父窗口主题消息
       if (window.self !== window.top) {
