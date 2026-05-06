@@ -7,7 +7,16 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 export function getSupabaseUrl(): string {
-  return `${(window as any).MEOO_CONFIG?.meoo_app_access_url || location.origin}/sb-api`;
+  const configUrl = (window as any).MEOO_CONFIG?.meoo_app_access_url;
+  if (configUrl) return `${configUrl}/sb-api`;
+
+  const origin = location.origin;
+  // Capacitor 原生环境 origin 为自定义 scheme（如 chaojiaapp://localhost），
+  // 不是有效的 HTTP/HTTPS URL，需使用占位地址避免 createClient 抛异常
+  if (origin && origin.startsWith('http')) {
+    return `${origin}/sb-api`;
+  }
+  return 'https://localhost/sb-api';
 }
 
 export const supabaseUrl = getSupabaseUrl();
