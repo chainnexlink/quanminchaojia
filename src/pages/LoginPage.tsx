@@ -27,6 +27,9 @@ export function LoginPage() {
       const msg = err instanceof Error ? err.message : '登录失败';
       if (msg.includes('Invalid login')) {
         showToast('邮箱或密码错误', 'error');
+      } else if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed') || msg.includes('timeout') || msg.includes('CORS')) {
+        showToast('网络连接异常，已进入游客模式', 'info');
+        navigate('/home', { replace: true });
       } else {
         showToast(msg, 'error');
       }

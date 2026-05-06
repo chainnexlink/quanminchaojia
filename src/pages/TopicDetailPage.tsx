@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Heart, MessageCircle, Share2, Bot, Clock, Users, Zap, ChevronDown, Sparkles, Timer, TrendingUp, Crown, MapPin, Coins, Shield, ArrowUpRight, AlertCircle, Flame } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, Share2, Bot, Clock, Users, Zap, ChevronDown, Sparkles, Timer, TrendingUp, Crown, MapPin, Coins, Shield, ArrowUpRight, AlertCircle, Flame, Flag, Ban, MoreVertical } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase/client';
 import type { Database } from '../supabase/types';
@@ -513,7 +513,10 @@ export function TopicDetailPage() {
         <button onClick={() => navigate(-1)} className="p-2 -ml-2 hover:bg-slate-700/50 rounded-full">
           <ArrowLeft className="w-5 h-5 text-slate-300" />
         </button>
-        <span className="font-semibold text-slate-100">话题详情</span>
+        <span className="font-semibold text-slate-100 flex-1">话题详情</span>
+        <button onClick={() => navigate(`/report/topic/${id}`)} className="p-2 hover:bg-slate-700/50 rounded-full" title="举报">
+          <Flag className="w-4 h-4 text-slate-400" />
+        </button>
       </div>
 
       <div className="bg-slate-800/80 backdrop-blur-sm border-b border-slate-700/50 p-4">

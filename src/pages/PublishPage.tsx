@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Camera, Video, AlertCircle, CheckCircle, Clock, MapPin, X } from 'lucide-react';
+import { ArrowLeft, Camera, AlertCircle, CheckCircle, Clock, MapPin, X } from 'lucide-react';
 import { useStore } from '../store';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/Toast';
@@ -17,7 +17,6 @@ export function PublishPage() {
   const [images, setImages] = useState<string[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const handleCampChange = (index: number, value: string) => {
     const newCamps = [...camps];
@@ -219,24 +218,11 @@ export function PublishPage() {
                 className="hidden"
                 onChange={handleFileSelect}
               />
-              <input
-                type="file"
-                ref={videoInputRef}
-                accept="video/*"
-                className="hidden"
-                onChange={handleFileSelect}
-              />
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="flex items-center gap-2 px-4 py-2 bg-slate-700/50 rounded-lg border border-slate-600/50 text-slate-300 hover:border-violet-500/50 hover:text-violet-400 transition-all"
               >
                 <Camera size={18} /> 图片
-              </button>
-              <button
-                onClick={() => videoInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-700/50 rounded-lg border border-slate-600/50 text-slate-300 hover:border-violet-500/50 hover:text-violet-400 transition-all"
-              >
-                <Video size={18} /> 视频
               </button>
             </div>
           </div>

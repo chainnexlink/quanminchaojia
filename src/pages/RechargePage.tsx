@@ -58,7 +58,7 @@ export function RechargePage() {
   // iOS 环境初始化 IAP
   useEffect(() => {
     if (useAppleIAP) {
-      initIAP().then(ok => setIapReady(ok));
+      initIAP().then(ok => setIapReady(ok)).catch(() => setIapReady(false));
     }
   }, [useAppleIAP]);
 
@@ -178,6 +178,22 @@ export function RechargePage() {
               className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl"
             >
               打开App充值
+            </button>
+          </div>
+        ) : useAppleIAP && !iapReady ? (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 text-center">
+            <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Coins className="w-8 h-8 text-amber-400" />
+            </div>
+            <h3 className="text-lg font-bold text-amber-300 mb-2">支付功能维护中</h3>
+            <p className="text-sm text-slate-400 mb-4">
+              Apple 内购服务正在配置中，请稍后再试。
+            </p>
+            <button
+              onClick={() => navigate(-1)}
+              className="w-full py-3 bg-gradient-to-r from-violet-500 to-purple-500 text-white font-semibold rounded-xl"
+            >
+              返回
             </button>
           </div>
         ) : (

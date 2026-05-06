@@ -45,10 +45,14 @@ export async function initIAP(): Promise<boolean> {
   try {
     const module = await import('@capgo/native-purchases');
     NativePurchases = module.NativePurchases;
-    isInitialized = true;
-    return true;
+    // 尝试调用一个安全的方法来验证插件是否真正可用
+    if (NativePurchases && typeof NativePurchases.restorePurchases === 'function') {
+      isInitialized = true;
+      return true;
+    }
+    return false;
   } catch (e) {
-    console.error('[IAP] 初始化失败:', e);
+    console.warn('[IAP] 插件不可用，已跳过初始化');
     return false;
   }
 }

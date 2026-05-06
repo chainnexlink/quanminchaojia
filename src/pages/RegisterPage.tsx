@@ -35,6 +35,9 @@ export function RegisterPage() {
       const msg = err instanceof Error ? err.message : '注册失败，请重试';
       if (msg.includes('already registered')) {
         showToast('该邮箱已注册，请直接登录', 'error');
+      } else if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed') || msg.includes('timeout') || msg.includes('CORS')) {
+        showToast('网络连接异常，已进入游客模式', 'info');
+        navigate('/home', { replace: true });
       } else {
         showToast(msg, 'error');
       }

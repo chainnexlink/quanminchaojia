@@ -1,14 +1,17 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Calendar, Users, Heart, MessageSquare, Share2, UserPlus, UserCheck } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Users, Heart, MessageSquare, Share2, UserPlus, UserCheck, Flag, Ban } from 'lucide-react';
 import { useState } from 'react';
 import { useStore } from '../store';
+import { useToast } from '../components/Toast';
 
 export function UserProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const { topics } = useStore();
+  const { showToast } = useToast();
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const [activeTab, setActiveTab] = useState<'posts' | 'likes'>('posts');
 
   const user = {
@@ -33,7 +36,10 @@ export function UserProfilePage() {
         <button onClick={() => navigate(-1)} className="p-2 -ml-2 hover:bg-slate-700/50 rounded-full">
           <ArrowLeft className="w-5 h-5 text-slate-300" />
         </button>
-        <span className="font-semibold text-slate-100">用户主页</span>
+        <span className="font-semibold text-slate-100 flex-1">用户主页</span>
+        <button onClick={() => navigate(`/report/user/${userId}`)} className="p-2 hover:bg-slate-700/50 rounded-full" title="举报用户">
+          <Flag className="w-4 h-4 text-slate-400" />
+        </button>
       </div>
 
       <div className="bg-slate-800/80 backdrop-blur-sm border-b border-slate-700/50 p-4">
@@ -90,6 +96,13 @@ export function UserProfilePage() {
             className="flex-1 py-2 bg-slate-700 text-slate-200 rounded-lg font-medium"
           >
             私信
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => { setIsBlocked(!isBlocked); showToast(isBlocked ? '已取消屏蔽' : '已屏蔽该用户，将不再看到其内容', isBlocked ? 'info' : 'success'); }}
+            className={`py-2 px-3 rounded-lg font-medium flex items-center gap-1 ${isBlocked ? 'bg-red-500/20 text-red-400' : 'bg-slate-700 text-slate-400'}`}
+          >
+            <Ban className="w-4 h-4" /> {isBlocked ? '已屏蔽' : '屏蔽'}
           </motion.button>
         </div>
       </div>
