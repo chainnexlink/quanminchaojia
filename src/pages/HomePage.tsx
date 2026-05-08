@@ -6,6 +6,7 @@ import type { Tables } from '../supabase/types';
 import { defaultAIModels, type AIModelConfig, modelIconSVGs } from '../services/aiModels';
 import { calculateDisplayVotes } from '../services/aiBoostService';
 import { useToast } from '../components/Toast';
+import { useStore } from '../store';
 
 type Topic = Tables<'topics'> & {
   creator?: Partial<Tables<'profiles'>>;
@@ -247,6 +248,7 @@ const cultureTopics: Topic[] = [
 export function HomePage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { blockedUsers } = useStore();
   const [activeTab, setActiveTab] = useState<'all' | 'food' | 'lifestyle' | 'regional' | 'custom'>('all');
   const [loading, setLoading] = useState(true);
   const [aiModalOpen, setAiModalOpen] = useState(false);
@@ -575,9 +577,10 @@ export function HomePage() {
     );
   };
 
-  const displayedTopics = activeTab === 'all' 
+  const displayedTopics = (activeTab === 'all' 
     ? topics 
-    : topics.filter(t => t.category === activeTab);
+    : topics.filter(t => t.category === activeTab)
+  ).filter(t => !blockedUsers.includes(t.creator_id));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 pb-20">

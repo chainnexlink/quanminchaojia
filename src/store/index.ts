@@ -26,6 +26,7 @@ interface AppState {
   pointsHistory: PointsTransaction[];
   cashHistory: CashTransaction[];
   shopItems: ShopItem[];
+  blockedUsers: string[];
   isLoading: boolean;
   
   // Auth
@@ -51,6 +52,10 @@ interface AppState {
   updateProfile: (data: Partial<Profile>) => Promise<void>;
   followUser: (userId: string) => Promise<void>;
   unfollowUser: (userId: string) => Promise<void>;
+  
+  // Block
+  blockUser: (userId: string) => void;
+  unblockUser: (userId: string) => void;
   
   // Transactions
   fetchPointsHistory: () => Promise<void>;
@@ -102,6 +107,7 @@ export const useStore = create<AppState>((set, get) => ({
   pointsHistory: [],
   cashHistory: [],
   shopItems: defaultShopItems,
+  blockedUsers: JSON.parse(localStorage.getItem('blockedUsers') || '[]'),
   isLoading: false,
 
   login: async (email, password) => {
@@ -286,5 +292,20 @@ export const useStore = create<AppState>((set, get) => ({
     const { user } = get();
     if (!user) return;
     set({ user: { ...user, total_power: (user.total_power || 0) + amount, season_power: (user.season_power || 0) + amount } });
+  },
+
+  blockUser: (userId: string) => {
+    const { blockedUsers } = get();
+    if (blockedUsers.includes(userId)) return;
+    const updated = [...blockedUsers, userId];
+    localStorage.setItem('blockedUsers', JSON.stringify(updated));
+    set({ blockedUsers: updated });
+  },
+
+  unblockUser: (userId: string) => {
+    const { blockedUsers } = get();
+    const updated = blockedUsers.filter(id => id !== userId);
+    localStorage.setItem('blockedUsers', JSON.stringify(updated));
+    set({ blockedUsers: updated });
   }
 }));

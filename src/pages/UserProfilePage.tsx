@@ -8,10 +8,10 @@ import { useToast } from '../components/Toast';
 export function UserProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { topics } = useStore();
+  const { topics, blockedUsers, blockUser, unblockUser } = useStore();
   const { showToast } = useToast();
   const [isFollowing, setIsFollowing] = useState(false);
-  const [isBlocked, setIsBlocked] = useState(false);
+  const isBlocked = blockedUsers.includes(userId || '');
   const [activeTab, setActiveTab] = useState<'posts' | 'likes'>('posts');
 
   const user = {
@@ -99,7 +99,15 @@ export function UserProfilePage() {
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => { setIsBlocked(!isBlocked); showToast(isBlocked ? '已取消屏蔽' : '已屏蔽该用户，将不再看到其内容', isBlocked ? 'info' : 'success'); }}
+            onClick={() => {
+              if (isBlocked) {
+                unblockUser(userId || '');
+                showToast('已取消屏蔽', 'info');
+              } else {
+                blockUser(userId || '');
+                showToast('已屏蔽该用户，其内容已从信息流中移除。我们已记录此操作，开发团队将审核该用户内容。', 'success');
+              }
+            }}
             className={`py-2 px-3 rounded-lg font-medium flex items-center gap-1 ${isBlocked ? 'bg-red-500/20 text-red-400' : 'bg-slate-700 text-slate-400'}`}
           >
             <Ban className="w-4 h-4" /> {isBlocked ? '已屏蔽' : '屏蔽'}

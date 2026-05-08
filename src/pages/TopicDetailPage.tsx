@@ -42,7 +42,7 @@ type Comment = Database['public']['Tables']['comments']['Row'];
 export function TopicDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, voteTopic, supportTopic, saveAIJudgment, addComment: storeAddComment, fetchComments } = useStore();
+  const { user, voteTopic, supportTopic, saveAIJudgment, addComment: storeAddComment, fetchComments, blockedUsers } = useStore();
   const { showToast } = useToast();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [creator, setCreator] = useState<Profile | null>(null);
@@ -806,7 +806,7 @@ export function TopicDetailPage() {
 
         {comments.length > 0 ? (
           <div className="space-y-3">
-            {comments.map((comment) => (
+            {comments.filter(c => !blockedUsers.includes(c.user_id)).map((comment) => (
               <motion.div
                 key={comment.id}
                 initial={{ opacity: 0, y: 10 }}

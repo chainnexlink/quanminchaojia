@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, UserPlus, Mail, Lock, User, ArrowLeft, CheckCircle, Shield } from 'lucide-react';
 import { useStore } from '../store';
 import { useToast } from '../components/Toast';
+import { supabaseUrl } from '../supabase/client';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -26,6 +27,12 @@ export function RegisterPage() {
 
   const handleRegister = async () => {
     if (!canSubmit) return;
+    // 原生环境下 Supabase 不可用，直接进入游客模式
+    if (supabaseUrl.includes('localhost')) {
+      showToast('已进入游客模式', 'info');
+      navigate('/home', { replace: true });
+      return;
+    }
     setLoading(true);
     try {
       await register(email, password, nickname.trim());
@@ -33,9 +40,10 @@ export function RegisterPage() {
       setStep('success');
     } catch (err) {
       const msg = err instanceof Error ? err.message : '注册失败，请重试';
+      const lowerMsg = msg.toLowerCase();
       if (msg.includes('already registered')) {
         showToast('该邮箱已注册，请直接登录', 'error');
-      } else if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed') || msg.includes('timeout') || msg.includes('CORS')) {
+      } else if (lowerMsg.includes('fetch') || lowerMsg.includes('network') || lowerMsg.includes('failed') || lowerMsg.includes('timeout') || lowerMsg.includes('cors') || lowerMsg.includes('load')) {
         showToast('网络连接异常，已进入游客模式', 'info');
         navigate('/home', { replace: true });
       } else {
